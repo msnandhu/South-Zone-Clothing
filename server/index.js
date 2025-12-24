@@ -224,6 +224,21 @@ app.post('/send-sms', async (req, res) => {
     }
 });
 
+// Serve Static Assets in Production
+if (process.env.NODE_ENV === 'production' || process.env.VITE_API_URL === '/api') {
+    // Serve any static files
+    app.use(express.static(path.join(__dirname, '../dist')));
+
+    // Handle React routing, return all requests to React app
+    app.get('*', (req, res) => {
+        // Skip API routes that fell through (should have been handled above or by 404)
+        if (req.url.startsWith('/api')) {
+            return res.status(404).json({ error: 'API endpoint not found' });
+        }
+        res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+    });
+}
+
 const PORT = process.env.PORT || 3001;
 if (require.main === module) {
     app.listen(PORT, () => {
