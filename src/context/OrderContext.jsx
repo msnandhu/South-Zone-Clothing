@@ -7,7 +7,7 @@ export const useOrder = () => useContext(OrderContext);
 export const OrderProvider = ({ children }) => {
     const [orders, setOrders] = useState([]);
 
-    const API_URL = import.meta.env.VITE_API_URL;
+    const API_URL = import.meta.env.VITE_API_URL || '';
 
     useEffect(() => {
         fetch(`${API_URL}/api/orders`)
