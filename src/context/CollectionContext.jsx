@@ -33,7 +33,11 @@ export const CollectionProvider = ({ children }) => {
     });
 
     useEffect(() => {
-        localStorage.setItem('collections', JSON.stringify(collections));
+        try {
+            localStorage.setItem('collections', JSON.stringify(collections));
+        } catch (error) {
+            console.error('Failed to save collections to localStorage:', error);
+        }
     }, [collections]);
 
     const addCollection = (newCollection) => {

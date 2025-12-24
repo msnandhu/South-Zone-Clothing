@@ -7,8 +7,12 @@ const AdminProducts = () => {
     const { products, deleteProduct } = useProduct();
 
     const handleDelete = (id) => {
-        // eslint-disable-next-line no-restricted-globals
-        if (confirm('Are you sure you want to delete this product?')) {
+        if (!id) {
+            console.error('Attempted to delete product without ID');
+            return;
+        }
+        if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+            console.log('Deleting product:', id);
             deleteProduct(id);
         }
     };
@@ -48,6 +52,7 @@ const AdminProducts = () => {
                                     <button className="action-btn btn-edit"><Edit size={16} /></button>
                                 </Link>
                                 <button
+                                    type="button"
                                     className="action-btn btn-delete"
                                     onClick={() => handleDelete(product.id)}
                                 >

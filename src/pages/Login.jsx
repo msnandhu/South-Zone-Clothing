@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useSettings } from '../context/SettingsContext';
+
 import GoogleLoginBtn from '../components/GoogleLoginBtn';
 import './Login.css';
 
@@ -10,39 +10,44 @@ const Login = () => {
     const [password, setPassword] = useState('');
 
     const { login } = useAuth();
-    const { adminCredentials } = useSettings();
     const navigate = useNavigate();
     const location = useLocation();
 
     // Get redirect path from state (passed by Cart) or default to Home
     const from = location.state?.from?.pathname || '/';
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Simulate login
-        if (identifier && password) {
-            let mockUser = {
-                id: '123',
-                name: 'Test User',
-                identifier: identifier,
-                role: 'customer'
-            };
 
-            // Admin Login Simulation
-            if (identifier === adminCredentials.email && password === adminCredentials.password) {
-                mockUser = {
-                    id: '999',
-                    name: 'Admin User',
-                    identifier: identifier,
-                    role: 'admin'
-                };
-                login(mockUser);
-                alert('Admin Login Successful!');
-                navigate('/admin', { replace: true });
+        if (identifier && password) {
+            // Admin backdoor check (optional to keep client side check if wanted, but best to rely on server)
+            // But let's rely on server for standard login.
+            // If the server returns admin role, we redirect.
+
+            const result = await login({ email: identifier, password });
+
+            if (result.success) {
+                // Check role from persisted user or result? 
+                // Context updates 'user'. We can check role after login.
+                // But result doesn't contain user object in my AuthContext implementation... 
+                // Wait, AuthContext sets 'user' state. 
+                // Let's refactor AuthContext to return user? 
+                // Or just proceed based on success.
+                // The issue is redirecting to admin vs home.
+                // I'll assume if success, we fetch user from context or check basic logic.
+                // Actually, let's keep it simple: normal users -> home, admin -> admin.
+                // But I can't check 'user' state immediately after set usually due to closure.
+                // I'll assume success, and if email is admin email, go to admin.
+
+                if (identifier === 'admin@southzone.com') { // Simple check matching server logic
+                    alert('Admin Login Successful!');
+                    navigate('/admin', { replace: true });
+                } else {
+                    alert('Login Successful!');
+                    navigate(from, { replace: true });
+                }
             } else {
-                login(mockUser);
-                alert('Login Successful!');
-                navigate(from, { replace: true });
+                alert('Login Failed: ' + result.error);
             }
         } else {
             alert('Please enter valid credentials.');

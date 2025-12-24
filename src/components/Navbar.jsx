@@ -50,7 +50,7 @@ const Navbar = () => {
 
                     {/* Centered Logo */}
                     <Link to="/" className="logo-center">
-                        <img src="/logo-nav-new.png" alt="South Zone" className="navbar-logo-img" />
+                        <img src="/southzone-logo-v2.png" alt="South Zone" className="navbar-logo-img" />
                     </Link>
 
                     {/* Right Icons/Links */}

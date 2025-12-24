@@ -9,27 +9,26 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const { login } = useAuth();
+    const { register } = useAuth(); // Import register instead of just login
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Simulate registration
+
         if (firstName && lastName && email && password) {
-            // Create mock user object
-            const mockUser = {
-                id: Date.now().toString(),
+            const result = await register({
                 name: `${firstName} ${lastName}`,
-                identifier: email
-            };
+                email,
+                password,
+                phone: '' // Add phone input if needed, using empty for now or add field
+            });
 
-            // In a real app, we would make an API call to register here.
-            // For now, we'll just simulate a successful registration and login.
-            console.log('Registered user:', mockUser);
-
-            login(mockUser);
-            alert('Account Created Successfully!');
-            navigate('/');
+            if (result.success) {
+                alert('Account Created Successfully!');
+                navigate('/');
+            } else {
+                alert('Registration Failed: ' + result.error);
+            }
         } else {
             alert('Please fill in all fields.');
         }

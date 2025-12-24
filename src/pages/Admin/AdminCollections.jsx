@@ -13,6 +13,7 @@ const AdminCollections = () => {
         textPosition: 'middle',
         textColor: '#ffffff'
     });
+    const [statusMsg, setStatusMsg] = useState('');
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -49,6 +50,7 @@ const AdminCollections = () => {
     };
 
     return (
+
         <div className="admin-page">
             <div className="admin-header">
                 <div>
@@ -61,10 +63,11 @@ const AdminCollections = () => {
                         onClick={() => {
                             try {
                                 localStorage.setItem('collectionPreset', JSON.stringify(collections));
-                                alert(`Preset saved successfully! (${collections.length} collections)`);
+                                setStatusMsg(`Preset saved successfully! (${collections.length} collections)`);
+                                setTimeout(() => setStatusMsg(''), 3000);
                             } catch (error) {
                                 console.error('Save failed:', error);
-                                alert('Failed to save preset.');
+                                setStatusMsg(`Failed to save: ${error.message}`);
                             }
                         }}
                         className="btn-secondary"
@@ -80,14 +83,16 @@ const AdminCollections = () => {
                                 if (saved) {
                                     if (window.confirm('Are you sure you want to load the preset? This will overwrite current changes.')) {
                                         setCollections(JSON.parse(saved));
-                                        alert('Preset loaded successfully!');
+                                        setStatusMsg('Preset loaded successfully!');
+                                        setTimeout(() => setStatusMsg(''), 3000);
                                     }
                                 } else {
-                                    alert('No preset found. Save one first!');
+                                    setStatusMsg('No preset found. Save one first!');
+                                    setTimeout(() => setStatusMsg(''), 3000);
                                 }
                             } catch (error) {
                                 console.error('Load failed:', error);
-                                alert('Failed to load preset.');
+                                setStatusMsg(`Failed to load: ${error.message}`);
                             }
                         }}
                         className="btn-secondary"
@@ -100,6 +105,16 @@ const AdminCollections = () => {
                         {showForm ? 'Cancel' : 'Add New Collection'}
                     </button>
                 </div>
+                {statusMsg && <div style={{
+                    marginTop: '10px',
+                    padding: '10px',
+                    borderRadius: '5px',
+                    backgroundColor: statusMsg.includes('Failed') ? '#ffebee' : '#e8f5e9',
+                    color: statusMsg.includes('Failed') ? '#c62828' : '#2e7d32',
+                    textAlign: 'right'
+                }}>
+                    {statusMsg}
+                </div>}
             </div>
 
             {showForm && (

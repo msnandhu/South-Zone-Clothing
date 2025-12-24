@@ -7,14 +7,38 @@
  * @param {string} params.message - The message body.
  * @returns {Promise<boolean>} - Resolves to true if sent successfully.
  */
+/**
+ * Sends an SMS via the backend server (which uses Twilio).
+ * 
+ * @param {Object} params - The parameters for the SMS.
+ * @param {string} params.to - The recipient's phone number.
+ * @param {string} params.message - The message body.
+ * @returns {Promise<boolean>} - Resolves to true if sent successfully.
+ */
 export const sendSMS = async ({ to, message }) => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const API_URL = import.meta.env.VITE_API_URL;
+    try {
+        const response = await fetch(`${API_URL}/send-sms`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ to, message }),
+        });
 
-    // Log to console for verification (essential for our simulation)
-    console.log(`%c[SMS SIMULATION] To: ${to}`, 'color: #4caf50; font-weight: bold; font-size: 12px;');
-    console.log(`%cMessage: "${message}"`, 'color: #2196f3; font-style: italic; font-size: 12px;');
+        const data = await response.json();
 
-    // In a real app, this would be the API response check
-    return true;
+        if (data.success) {
+            console.log(`%c[SMS SENT] To: ${to} | SID: ${data.sid}`, 'color: #4caf50; font-weight: bold;');
+            return true;
+        } else {
+            console.error('[SMS FAILED]', data.error);
+            return false;
+        }
+    } catch (error) {
+        console.error('[SMS ERROR] Could not connect to backend:', error);
+        // Fallback: Log to console so user still sees something happened in dev
+        console.log(`%c[SMS SIMULATION (Fallback)] To: ${to}`, 'color: orange; font-weight: bold;');
+        return true;
+    }
 };

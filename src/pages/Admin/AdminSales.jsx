@@ -1,12 +1,50 @@
 import React, { useState } from 'react';
 import { useOrder } from '../../context/OrderContext';
-import { Search, TrendingUp, ShoppingBag, DollarSign } from 'lucide-react';
+import { Search, TrendingUp, ShoppingBag, DollarSign, Download } from 'lucide-react';
 import './Admin.css';
 
 const AdminSales = () => {
     const { orders, getOrderStats } = useOrder();
     const [searchTerm, setSearchTerm] = useState('');
     const { totalOrders, totalRevenue, avgOrderValue } = getOrderStats();
+
+
+    const downloadExcel = () => {
+        // Define CSV Headers
+        const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Address', 'Items', 'Total Amount', 'Status'];
+
+        // Convert orders to CSV rows
+        const csvRows = [
+            headers.join(','), // Header Row
+            ...filteredOrders.map(order => {
+                const itemsString = order.items.map(i => `${i.quantity}x ${i.name} (${i.size})`).join('; ');
+                // Escape fields that might contain commas
+                const escape = (text) => `"${(text || '').toString().replace(/"/g, '""')}"`;
+
+                return [
+                    escape(order.id),
+                    escape(new Date(order.date).toLocaleDateString()),
+                    escape(order.fullName),
+                    escape(order.phoneNumber),
+                    escape(`${order.address}, ${order.city}, ${order.postalCode}`), // Combine address fields
+                    escape(itemsString),
+                    escape(order.total),
+                    escape(order.status || 'Success')
+                ].join(',');
+            })
+        ];
+
+        // Create Blob and Download
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'southzone_orders.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     const filteredOrders = orders.filter(order =>
         order.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,17 +94,38 @@ const AdminSales = () => {
 
             {/* Orders Table */}
             <div className="admin-card">
-                <div className="page-header" style={{ marginBottom: '1rem' }}>
+                <div className="page-header" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3>Recent Orders</h3>
-                    <div className="search-box" style={{ display: 'flex', alignItems: 'center', background: '#f5f5f5', padding: '0.5rem 1rem', borderRadius: '8px' }}>
-                        <Search size={18} color="#888" />
-                        <input
-                            type="text"
-                            placeholder="Search Customer or Order ID..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ border: 'none', background: 'transparent', marginLeft: '0.5rem', outline: 'none', fontSize: '0.9rem' }}
-                        />
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            onClick={downloadExcel}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 1rem',
+                                backgroundColor: '#2e7d32', // Excel green color
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                fontWeight: '500'
+                            }}
+                        >
+                            <Download size={18} />
+                            Download Excel
+                        </button>
+                        <div className="search-box" style={{ display: 'flex', alignItems: 'center', background: '#f5f5f5', padding: '0.5rem 1rem', borderRadius: '8px' }}>
+                            <Search size={18} color="#888" />
+                            <input
+                                type="text"
+                                placeholder="Search Customer..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ border: 'none', background: 'transparent', marginLeft: '0.5rem', outline: 'none', fontSize: '0.9rem' }}
+                            />
+                        </div>
                     </div>
                 </div>
 
