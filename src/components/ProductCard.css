@@ -1,0 +1,89 @@
+.product-card {
+    background-color: transparent;
+    text-align: center;
+    /* Centered in design or left? Image suggests Center title */
+}
+
+.product-image-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/5;
+    /* Taller fashion aspect ratio */
+    background-color: var(--bg-secondary);
+    overflow: hidden;
+    border-radius: 8px;
+    /* Rounded corners from requirements */
+    margin-bottom: 1rem;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-image-container:hover .product-image {
+    transform: scale(1.08);
+    /* Minimal zoom */
+}
+
+.product-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #fff;
+    color: #000;
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 2;
+}
+
+.add-to-cart-btn {
+    display: none;
+    /* Removed hover button for cleaner look or keep it? Design doesn't show it explicitly, maybe keep for UX */
+}
+
+.product-info {
+    text-align: center;
+    padding: 0 0.5rem;
+}
+
+.product-link {
+    text-decoration: none;
+}
+
+.product-name {
+    font-family: var(--font-serif);
+    /* Serif titles "White Flannel Shirt" */
+    font-size: 1.1rem;
+    font-weight: 400;
+    /* Regular weight */
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.product-price {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-main);
+}
+
+.current-price {
+    font-weight: 600;
+    color: var(--accent-red);
+    /* Red Price */
+    font-size: 0.95rem;
+}
+
+.original-price {
+    color: var(--text-primary);
+    /* White strikethrough as per image? Or grey */
+    text-decoration: line-through;
+    font-size: 0.95rem;
+}

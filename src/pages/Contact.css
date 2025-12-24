@@ -1,0 +1,54 @@
+.contact-page {
+    padding: 4rem 1rem;
+    text-align: center;
+}
+
+.contact-content {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    margin-top: 3rem;
+    text-align: left;
+}
+
+.contact-details h3,
+.contact-form h3 {
+    font-family: var(--font-serif);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.contact-details p,
+.contact-details address {
+    color: var(--text-secondary);
+    color: #ccc;
+    /* Light gray for dark bg */
+    margin-bottom: 0.5rem;
+    font-style: normal;
+}
+
+.contact-form {
+    width: 100%;
+    max-width: 400px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+    border: 1px solid #ccc;
+    color: #000;
+    font-family: var(--font-main);
+}
+
+.mt-4 {
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .contact-content {
+        flex-direction: column;
+        align-items: center;
+    }
+}

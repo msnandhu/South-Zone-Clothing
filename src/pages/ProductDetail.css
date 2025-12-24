@@ -1,0 +1,213 @@
+.product-detail-page {
+    padding-top: 3rem;
+    padding-bottom: 5rem;
+}
+
+.product-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+}
+
+/* Gallery */
+.main-image-wrapper {
+    width: 100%;
+    aspect-ratio: 4/5;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    /* Rounded corners */
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.pdp-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+    /* or center */
+}
+
+.pdp-thumb {
+    width: 60px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.pdp-thumb.active,
+.pdp-thumb:hover {
+    opacity: 1;
+    border: 1px solid #fff;
+}
+
+/* Info Section */
+.pdp-title {
+    font-size: 2.5rem;
+    /* Large Serif title */
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.pdp-price-block {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-family: var(--font-main);
+}
+
+.pdp-current-price {
+    color: var(--accent-red);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.pdp-original-price {
+    color: #fff;
+    font-size: 1.2rem;
+    text-decoration: line-through;
+}
+
+.pdp-save-badge {
+    background-color: var(--accent-red);
+    color: #fff;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.separator-line {
+    height: 1px;
+    background-color: var(--border-color);
+    /* Could be white per design? No, usually subtle */
+    width: 100%;
+    margin: 1.5rem 0;
+}
+
+.stock-warning {
+    color: var(--accent-red);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.selector-title {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.size-selector-squares {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.size-square {
+    width: 50px;
+    height: 50px;
+    background: #fff;
+    color: #000;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.size-square:hover {
+    background: #e0e0e0;
+}
+
+.size-square.selected {
+    background: #000;
+    /* Inverted for selection? Or keep white. Design shows white boxes with black text. Maybe black border for selected */
+    color: #fff;
+    border: 2px solid #fff;
+}
+
+.quantity-box {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    width: 140px;
+    padding: 0.5rem;
+    justify-content: space-between;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    /* Spacing */
+}
+
+.quantity-box button {
+    color: #000;
+    display: flex;
+    align-items: center;
+}
+
+.quantity-box span {
+    color: #000;
+    font-weight: 600;
+}
+
+.pdp-actions-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline-white {
+    border: 1px solid #fff;
+    color: #fff;
+    background: transparent;
+}
+
+.btn-outline-white:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-white-fill {
+    background: #fff;
+    color: #000;
+    border: none;
+}
+
+.btn-white-fill:hover {
+    background: #e0e0e0;
+}
+
+.pdp-description-text {
+    font-family: var(--font-serif);
+    /* Design shows serif description text */
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+@media (max-width: 900px) {
+    .product-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}

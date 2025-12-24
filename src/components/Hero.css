@@ -1,0 +1,143 @@
+.hero-carousel {
+    position: relative;
+    height: 85vh;
+    width: 100%;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    display: flex;
+    /* Center content */
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* Contain the blurred overflow */
+}
+
+.slide-background {
+    position: absolute;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    /* Scale up slightly to hide blur edges */
+    height: 110%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(15px) brightness(0.6);
+    /* Blur and darken */
+    z-index: 0;
+}
+
+.slide-foreground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    /* Show full image */
+    background-position: center bottom;
+    /* Align to bottom usually looks better for full body shots, or center */
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+.hero-slide.active {
+    opacity: 1;
+    z-index: 1;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    /* Darken image for text readability */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-content {
+    text-align: center;
+    color: #fff;
+    z-index: 2;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.8s ease 0.5s;
+    /* Delay text appearance */
+}
+
+.hero-slide.active .hero-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.hero-title {
+    font-family: var(--font-serif);
+    font-size: 5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.shop-now-btn {
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    background-color: #fff;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-main);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.shop-now-btn:hover {
+    background-color: var(--accent-red);
+    color: #fff;
+    transform: translateY(-5px);
+}
+
+.hero-dots {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.dot.active {
+    background-color: #fff;
+    transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+}

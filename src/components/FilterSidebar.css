@@ -1,0 +1,136 @@
+.filter-sidebar {
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background: black;
+    color: white;
+}
+
+.filter-header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-header-main h3 {
+    font-weight: 400;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.close-btn-mobile {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.filter-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+.filter-header h4 {
+    font-weight: 500;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-gray);
+    cursor: pointer;
+}
+
+.checkbox-label input {
+    accent-color: var(--accent-red);
+}
+
+.price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.price-inputs input {
+    width: 60px;
+    padding: 0.3rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: white;
+    font-size: 0.9rem;
+}
+
+.size-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.size-btn-filter {
+    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-gray);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.size-btn-filter.active,
+.size-btn-filter:hover {
+    border-color: var(--accent-red);
+    color: white;
+}
+
+.filter-actions {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.clear-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: white;
+    cursor: pointer;
+}
+
+.apply-btn {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    background: white;
+    color: black;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.apply-btn:hover {
+    opacity: 0.9;
+}

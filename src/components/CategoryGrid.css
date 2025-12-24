@@ -1,0 +1,102 @@
+.categories-section {
+    padding: 5rem 0;
+    text-align: center;
+}
+
+.collection-title {
+    font-size: 2.5rem;
+    /* Matches "OUR COLLECTION" */
+    margin-bottom: 3rem;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+    text-transform: uppercase;
+}
+
+.category-grid {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0 1rem;
+}
+
+.category-card-link {
+    text-decoration: none;
+    display: block;
+}
+
+.category-card.vertical {
+    width: 300px;
+    height: 500px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    /* Based on image look */
+    cursor: pointer;
+}
+
+.img-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.category-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card:hover .category-image {
+    transform: scale(1.05);
+}
+
+.category-info-overlay {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    bottom: 2rem;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.pos-middle {
+    align-items: center;
+}
+
+.pos-top {
+    align-items: flex-start;
+    padding-top: 2rem;
+}
+
+.pos-bottom {
+    align-items: flex-end;
+    padding-bottom: 2rem;
+}
+
+.cat-card-title {
+    font-family: var(--font-main);
+    /* Sans serif titles on cards in image? Or Serif? using Main for clear readability */
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
+}
+
+@media (max-width: 900px) {
+    .category-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .category-card.vertical {
+        width: 100%;
+        max-width: 350px;
+        height: 400px;
+    }
+}
