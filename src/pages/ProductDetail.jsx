@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Minus, Plus, ShoppingBag } from 'lucide-react';
 import './ProductDetail.css';
 import { useCart } from '../context/CartContext';
@@ -7,6 +7,7 @@ import { useProduct } from '../context/ProductContext';
 
 const ProductDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { addToCart } = useCart();
     const { products: allProducts } = useProduct();
     const [selectedSize, setSelectedSize] = useState('S');
@@ -102,7 +103,10 @@ const ProductDetail = () => {
 
                     <div className="pdp-actions-stack">
                         <button className="btn-full btn-outline-white" onClick={handleAddToCart}>ADD TO CART</button>
-                        <button className="btn-full btn-white-fill">BUT IT NOW</button>
+                        <button className="btn-full btn-white-fill" onClick={() => {
+                            addToCart(product, quantity, selectedSize);
+                            navigate('/checkout');
+                        }}>BUY IT NOW</button>
                     </div>
 
                     <div className="pdp-description-text">
