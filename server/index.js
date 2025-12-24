@@ -178,10 +178,19 @@ app.post('/api/auth/login', async (req, res) => {
 
 
 // --- Twilio SMS ---
-const client = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-);
+let client;
+try {
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOUNT_SID.startsWith('AC')) {
+        client = twilio(
+            process.env.TWILIO_ACCOUNT_SID,
+            process.env.TWILIO_AUTH_TOKEN
+        );
+    } else {
+        console.warn('Twilio credentials missing or invalid. SMS service will be mocked.');
+    }
+} catch (err) {
+    console.warn('Failed to initialize Twilio client:', err.message);
+}
 
 app.post('/send-sms', async (req, res) => {
     const { to, message } = req.body;
@@ -192,14 +201,18 @@ app.post('/send-sms', async (req, res) => {
 
     try {
         console.log(`Sending SMS to ${to}...`);
-        const result = await client.messages.create({
-            body: message,
-            messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-            to: to
-        });
-
-        console.log('SMS Sent! SID:', result.sid);
-        res.json({ success: true, sid: result.sid });
+        if (client) {
+            const result = await client.messages.create({
+                body: message,
+                messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+                to: to
+            });
+            console.log('SMS Sent! SID:', result.sid);
+            res.json({ success: true, sid: result.sid });
+        } else {
+            console.log('[MOCK SMS] Message logged to console (Twilio not configured).');
+            res.json({ success: true, sid: 'MOCK_SID_' + Date.now() });
+        }
     } catch (error) {
         console.error('Error sending SMS:', error);
         res.status(500).json({ success: false, error: error.message });
