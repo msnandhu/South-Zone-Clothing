@@ -4,6 +4,7 @@ const cors = require('cors');
 const twilio = require('twilio');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 app.use(cors());
@@ -210,11 +211,13 @@ app.post('/api/auth/register', (req, res) => {
         return res.status(400).json({ error: 'User already exists' });
     }
 
+    const hashedPassword = bcrypt.hashSync(password, 8);
+
     const newUser = {
         id: Date.now().toString(),
         name: `${firstName} ${lastName}`,
         identifier: email,
-        password: password, // In production, hash this!
+        password: hashedPassword,
         role: 'customer'
     };
 
@@ -246,14 +249,19 @@ app.post('/api/auth/login', (req, res) => {
 
     // Check Customer
     const users = db.users || [];
-    const customer = users.find(u => u.identifier === email && u.password === password);
+    const customer = users.find(u => u.identifier === email);
 
     if (customer) {
-        const { password: _, ...userWithoutPass } = customer;
-        return res.json({
-            success: true,
-            user: userWithoutPass
-        });
+        // Allow legacy plain text or bcrypt hash
+        const isValid = bcrypt.compareSync(password, customer.password) || customer.password === password;
+
+        if (isValid) {
+            const { password: _, ...userWithoutPass } = customer;
+            return res.json({
+                success: true,
+                user: userWithoutPass
+            });
+        }
     }
 
     res.status(401).json({ success: false, error: 'Invalid credentials' });
