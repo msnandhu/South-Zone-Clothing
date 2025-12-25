@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCollection } from '../../context/CollectionContext';
-import { Trash2, Plus, Image as ImageIcon, Save } from 'lucide-react';
+import { Trash2, Plus, Save } from 'lucide-react';
 import './Admin.css';
 
 const AdminCollections = () => {
@@ -13,7 +13,6 @@ const AdminCollections = () => {
         textPosition: 'middle',
         textColor: '#ffffff'
     });
-    const [statusMsg, setStatusMsg] = useState('');
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
