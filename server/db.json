@@ -35,5 +35,24 @@
       "image": "/hero4.jpg",
       "caption": "SHOP THE COLLECTION"
     }
+  ],
+  "collections": [
+    {
+      "title": "TEST COLLECTION",
+      "image": "data:image/png;base64,",
+      "link": "/shop?category=test-collection",
+      "textPosition": "middle",
+      "textColor": "#ffffff",
+      "id": 1766643270564
+    }
+  ],
+  "offers": [
+    {
+      "title": "TEST OFFER",
+      "discountPercentage": 50,
+      "description": "Test Desc",
+      "image": "data:image/png;base64,",
+      "id": 1766643542612
+    }
   ]
 }

@@ -4,7 +4,7 @@ import { Trash2, Plus, Image as ImageIcon, Save } from 'lucide-react';
 import './Admin.css';
 
 const AdminCollections = () => {
-    const { collections, addCollection, deleteCollection, setCollections } = useCollection();
+    const { collections, addCollection, deleteCollection, saveCollections, setCollections } = useCollection();
     const [showForm, setShowForm] = useState(false);
     const [newCollection, setNewCollection] = useState({
         title: '',
@@ -60,61 +60,17 @@ const AdminCollections = () => {
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <button
                         type="button"
-                        onClick={() => {
-                            try {
-                                localStorage.setItem('collectionPreset', JSON.stringify(collections));
-                                setStatusMsg(`Preset saved successfully! (${collections.length} collections)`);
-                                setTimeout(() => setStatusMsg(''), 3000);
-                            } catch (error) {
-                                console.error('Save failed:', error);
-                                setStatusMsg(`Failed to save: ${error.message}`);
-                            }
-                        }}
+                        onClick={() => saveCollections(collections)}
                         className="btn-secondary"
                         style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
                     >
                         <Save size={18} /> Save Preset
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            try {
-                                const saved = localStorage.getItem('collectionPreset');
-                                if (saved) {
-                                    if (window.confirm('Are you sure you want to load the preset? This will overwrite current changes.')) {
-                                        setCollections(JSON.parse(saved));
-                                        setStatusMsg('Preset loaded successfully!');
-                                        setTimeout(() => setStatusMsg(''), 3000);
-                                    }
-                                } else {
-                                    setStatusMsg('No preset found. Save one first!');
-                                    setTimeout(() => setStatusMsg(''), 3000);
-                                }
-                            } catch (error) {
-                                console.error('Load failed:', error);
-                                setStatusMsg(`Failed to load: ${error.message}`);
-                            }
-                        }}
-                        className="btn-secondary"
-                        style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
-                    >
-                        <ImageIcon size={18} /> Load Preset
                     </button>
                     <button type="button" onClick={() => setShowForm(!showForm)} className="btn-black">
                         <Plus size={18} style={{ marginRight: '8px' }} />
                         {showForm ? 'Cancel' : 'Add New Collection'}
                     </button>
                 </div>
-                {statusMsg && <div style={{
-                    marginTop: '10px',
-                    padding: '10px',
-                    borderRadius: '5px',
-                    backgroundColor: statusMsg.includes('Failed') ? '#ffebee' : '#e8f5e9',
-                    color: statusMsg.includes('Failed') ? '#c62828' : '#2e7d32',
-                    textAlign: 'right'
-                }}>
-                    {statusMsg}
-                </div>}
             </div>
 
             {showForm && (

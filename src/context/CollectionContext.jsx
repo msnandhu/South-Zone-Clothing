@@ -36,8 +36,21 @@ export const CollectionProvider = ({ children }) => {
         }
     };
 
+    const saveCollections = async (newCollections) => {
+        try {
+            const result = await api.put('/collections', newCollections);
+            if (result && result.success) {
+                setCollections(result.collections);
+                alert('Collections saved successfully!');
+            }
+        } catch (error) {
+            console.error('Failed to save collections:', error);
+            alert('Failed to save collections');
+        }
+    };
+
     return (
-        <CollectionContext.Provider value={{ collections, addCollection, deleteCollection, setCollections }}>
+        <CollectionContext.Provider value={{ collections, addCollection, deleteCollection, saveCollections, setCollections }}>
             {children}
         </CollectionContext.Provider>
     );

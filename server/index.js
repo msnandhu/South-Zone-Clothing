@@ -163,6 +163,17 @@ app.delete('/api/collections/:id', (req, res) => {
     res.json({ success: true });
 });
 
+app.put('/api/collections', (req, res) => {
+    const db = readDB();
+    const collections = req.body;
+    if (!Array.isArray(collections)) {
+        return res.status(400).json({ error: 'Input must be an array of collections' });
+    }
+    db.collections = collections;
+    writeDB(db);
+    res.json({ success: true, collections: db.collections });
+});
+
 // --- Settings Routes (Admin Creds, Site Content, FAQs) ---
 app.get('/api/settings', (req, res) => {
     const db = readDB();
