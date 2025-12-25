@@ -4,7 +4,7 @@ import { Trash2, Plus, Save } from 'lucide-react';
 import './Admin.css';
 
 const AdminCollections = () => {
-    const { collections, addCollection, deleteCollection, saveCollections, setCollections } = useCollection();
+    const { collections, addCollection, deleteCollection, saveCollections } = useCollection();
     const [showForm, setShowForm] = useState(false);
     const [newCollection, setNewCollection] = useState({
         title: '',
