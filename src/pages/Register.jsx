@@ -9,25 +9,33 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const { register } = useAuth(); // Import register instead of just login
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (firstName && lastName && email && password) {
-            const result = await register({
-                name: `${firstName} ${lastName}`,
-                email,
-                password,
-                phone: '' // Add phone input if needed, using empty for now or add field
-            });
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, email, password })
+                });
 
-            if (result.success) {
-                alert('Account Created Successfully!');
-                navigate('/');
-            } else {
-                alert('Registration Failed: ' + result.error);
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // console.log('Registered user:', data.user);
+                    login(data.user);
+                    alert('Account Created Successfully!');
+                    navigate('/');
+                } else {
+                    alert(data.error || 'Registration failed');
+                }
+            } catch (err) {
+                console.error("Registration error", err);
+                alert('Registration failed. Please try again.');
             }
         } else {
             alert('Please fill in all fields.');

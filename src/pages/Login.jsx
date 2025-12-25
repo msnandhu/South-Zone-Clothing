@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
+import { useSettings } from '../context/SettingsContext';
 import GoogleLoginBtn from '../components/GoogleLoginBtn';
 import './Login.css';
 
@@ -9,7 +9,10 @@ const Login = () => {
     const [identifier, setIdentifier] = useState(''); // Email or Phone
     const [password, setPassword] = useState('');
 
+    const [error, setError] = useState('');
+
     const { login } = useAuth();
+    // const { adminCredentials } = useSettings(); // No longer needed
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -18,36 +21,33 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
 
         if (identifier && password) {
-            // Admin backdoor check (optional to keep client side check if wanted, but best to rely on server)
-            // But let's rely on server for standard login.
-            // If the server returns admin role, we redirect.
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: identifier, password })
+                });
 
-            const result = await login({ email: identifier, password });
+                const data = await response.json();
 
-            if (result.success) {
-                // Check role from persisted user or result? 
-                // Context updates 'user'. We can check role after login.
-                // But result doesn't contain user object in my AuthContext implementation... 
-                // Wait, AuthContext sets 'user' state. 
-                // Let's refactor AuthContext to return user? 
-                // Or just proceed based on success.
-                // The issue is redirecting to admin vs home.
-                // I'll assume if success, we fetch user from context or check basic logic.
-                // Actually, let's keep it simple: normal users -> home, admin -> admin.
-                // But I can't check 'user' state immediately after set usually due to closure.
-                // I'll assume success, and if email is admin email, go to admin.
-
-                if (identifier === 'admin@southzone.com') { // Simple check matching server logic
-                    alert('Admin Login Successful!');
-                    navigate('/admin', { replace: true });
+                if (response.ok && data.success) {
+                    login(data.user);
+                    if (data.user.role === 'admin') {
+                        alert('Admin Login Successful!');
+                        navigate('/admin', { replace: true });
+                    } else {
+                        alert('Login Successful!');
+                        navigate(from, { replace: true });
+                    }
                 } else {
-                    alert('Login Successful!');
-                    navigate(from, { replace: true });
+                    setError(data.error || 'Login failed');
                 }
-            } else {
-                alert('Login Failed: ' + result.error);
+            } catch (err) {
+                console.error("Login error", err);
+                setError('Login failed. Please try again.');
             }
         } else {
             alert('Please enter valid credentials.');

@@ -5,198 +5,307 @@ const twilio = require('twilio');
 const fs = require('fs');
 const path = require('path');
 
-const connectDB = require('./config/db');
-const Product = require('./models/Product');
-const Order = require('./models/Order');
-const User = require('./models/User');
-
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '50mb' })); // Increase limit for base64 images
 
-// Health Check Route
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date() });
-});
+// Database Helper
+const DB_FILE = path.join(__dirname, 'db.json');
 
-// Connect to MongoDB
-connectDB();
-
-// Seeder Function
-const seedData = async () => {
+const readDB = () => {
     try {
-        const productCount = await Product.countDocuments();
-        if (productCount === 0) {
-
+        if (!fs.existsSync(DB_FILE)) {
+            const initialData = { products: [], orders: [], users: [] };
+            fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
+            return initialData;
         }
+        return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
     } catch (err) {
-        console.error('Seeding Error:', err);
+        console.error('Error reading DB:', err);
+        return { products: [], orders: [], users: [] };
     }
 };
-seedData();
+
+const writeDB = (data) => {
+    try {
+        fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+    } catch (err) {
+        console.error('Error writing DB:', err);
+    }
+};
+
+// --- Generic Helpers ---
+const getCollection = (db, collectionName) => db[collectionName] || [];
+const saveCollection = (db, collectionName, data) => {
+    db[collectionName] = data;
+    writeDB(db);
+};
 
 // --- Product Routes ---
+app.get('/api/products', (req, res) => {
+    const db = readDB();
+    res.json(db.products || []);
+});
 
-// GET All Products
-app.get('/api/products', async (req, res) => {
-    try {
-        const products = await Product.find({});
-        res.json(products);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+app.post('/api/products', (req, res) => {
+    const db = readDB();
+    const newProduct = { ...req.body, id: Date.now() };
+    db.products = [...(db.products || []), newProduct];
+    writeDB(db);
+    res.status(201).json(newProduct);
+});
+
+app.put('/api/products/:id', (req, res) => {
+    const db = readDB();
+    const id = Number(req.params.id);
+    const index = (db.products || []).findIndex(p => p.id === id);
+    if (index !== -1) {
+        db.products[index] = { ...db.products[index], ...req.body };
+        writeDB(db);
+        res.json(db.products[index]);
+    } else {
+        res.status(404).json({ error: 'Product not found' });
     }
 });
 
-// POST Create Product
-app.post('/api/products', async (req, res) => {
-    try {
-        // Simple ID generation for now using timestamp, normally Mongo _id is sufficient
-        // but frontend expects 'id'.
-        const newProduct = new Product({
-            ...req.body,
-            id: Date.now()
-        });
-        const savedProduct = await newProduct.save();
-        res.status(201).json(savedProduct);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+app.delete('/api/products/:id', (req, res) => {
+    const db = readDB();
+    const id = Number(req.params.id);
+    const initialLength = (db.products || []).length;
+    db.products = (db.products || []).filter(p => p.id !== id);
+    if (db.products.length !== initialLength) {
+        writeDB(db);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'Product not found' });
     }
 });
 
-// PUT Update Product
-app.put('/api/products/:id', async (req, res) => {
-    try {
-        const updatedProduct = await Product.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
-        );
-        if (updatedProduct) {
-            res.json(updatedProduct);
-        } else {
-            res.status(404).json({ error: 'Product not found' });
-        }
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
+// --- Category Routes ---
+app.get('/api/categories', (req, res) => {
+    const db = readDB();
+    res.json(db.categories || ['shirts', 'pants', 't-shirts']); // Default if empty
 });
 
-// DELETE Product
-app.delete('/api/products/:id', async (req, res) => {
-    try {
-        const deletedProduct = await Product.findOneAndDelete({ id: req.params.id });
-        if (deletedProduct) {
-            res.json({ success: true });
-        } else {
-            res.status(404).json({ error: 'Product not found' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+app.post('/api/categories', (req, res) => {
+    const db = readDB();
+    const { category } = req.body;
+    if (!category) return res.status(400).json({ error: 'Category name required' });
 
+    const categories = db.categories || ['shirts', 'pants', 't-shirts'];
+    if (!categories.includes(category)) {
+        db.categories = [...categories, category];
+        writeDB(db);
+    }
+    res.json(db.categories);
+});
 
 // --- Order Routes ---
-
-// GET All Orders
-app.get('/api/orders', async (req, res) => {
-    try {
-        const orders = await Order.find({}).sort({ createdAt: -1 });
-        res.json(orders);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+app.get('/api/orders', (req, res) => {
+    const db = readDB();
+    res.json(db.orders || []);
 });
 
-// POST Create Order
-app.post('/api/orders', async (req, res) => {
-    try {
-        const newOrder = new Order({
-            ...req.body,
-            id: 'ORD-' + Date.now(), // Generate ID
-            status: 'Pending'
-        });
-        const savedOrder = await newOrder.save();
-        res.status(201).json(savedOrder);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
+app.post('/api/orders', (req, res) => {
+    const db = readDB();
+    const newOrder = {
+        ...req.body,
+        id: 'ORD-' + Date.now(),
+        date: new Date().toISOString(),
+        status: 'Pending'
+    };
+    db.orders = [newOrder, ...(db.orders || [])];
+    writeDB(db);
+    res.status(201).json(newOrder);
 });
 
+// --- Offer Routes ---
+app.get('/api/offers', (req, res) => {
+    const db = readDB();
+    res.json(db.offers || []);
+});
+
+app.post('/api/offers', (req, res) => {
+    const db = readDB();
+    const newOffer = { ...req.body, id: Date.now() };
+    db.offers = [...(db.offers || []), newOffer];
+    writeDB(db);
+    res.status(201).json(newOffer);
+});
+
+app.delete('/api/offers/:id', (req, res) => {
+    const db = readDB();
+    const id = Number(req.params.id);
+    db.offers = (db.offers || []).filter(o => o.id !== id);
+    writeDB(db);
+    res.json({ success: true });
+});
+
+// --- Collection Routes ---
+app.get('/api/collections', (req, res) => {
+    const db = readDB();
+    res.json(db.collections || []); // Should handle initial seed on frontend or here
+});
+
+app.post('/api/collections', (req, res) => {
+    const db = readDB();
+    const newCollection = { ...req.body, id: Date.now() };
+    db.collections = [...(db.collections || []), newCollection];
+    writeDB(db);
+    res.status(201).json(newCollection);
+});
+
+app.delete('/api/collections/:id', (req, res) => {
+    const db = readDB();
+    const id = Number(req.params.id);
+    db.collections = (db.collections || []).filter(c => c.id !== id);
+    writeDB(db);
+    res.json({ success: true });
+});
+
+// --- Settings Routes (Admin Creds, Site Content, FAQs) ---
+app.get('/api/settings', (req, res) => {
+    const db = readDB();
+    res.json({
+        adminCredentials: db.adminCredentials || null,
+        siteContent: db.siteContent || null,
+        faqs: db.faqs || []
+    });
+});
+
+app.post('/api/settings', (req, res) => {
+    const db = readDB();
+    const { adminCredentials, siteContent, faqs } = req.body;
+
+    if (adminCredentials) db.adminCredentials = adminCredentials;
+    if (siteContent) db.siteContent = siteContent;
+    if (faqs) db.faqs = faqs;
+
+    writeDB(db);
+    res.json({ success: true });
+});
 
 // --- Auth Routes ---
+app.post('/api/auth/register', (req, res) => {
+    const db = readDB();
+    const { firstName, lastName, email, password } = req.body;
 
-// POST Register
-app.post('/api/auth/register', async (req, res) => {
-    const { name, email, password, phone } = req.body;
-
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ error: 'User already exists' });
-        }
-
-        const newUser = new User({
-            id: Date.now().toString(),
-            name,
-            email,
-            password, // NOTE: Hash this in production!
-            phone,
-            role: 'user'
-        });
-
-        await newUser.save();
-
-        const { password: _, ...userWithoutPassword } = newUser.toObject();
-        res.status(201).json(userWithoutPassword);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ error: 'All fields are required' });
     }
+
+    const users = db.users || [];
+    if (users.find(u => u.identifier === email)) {
+        return res.status(400).json({ error: 'User already exists' });
+    }
+
+    const newUser = {
+        id: Date.now().toString(),
+        name: `${firstName} ${lastName}`,
+        identifier: email,
+        password: password, // In production, hash this!
+        role: 'customer'
+    };
+
+    db.users = [...users, newUser];
+    writeDB(db);
+
+    // Return user without password
+    const { password: _, ...userWithoutPass } = newUser;
+    res.status(201).json({ success: true, user: userWithoutPass });
 });
 
-// POST Login
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', (req, res) => {
+    const db = readDB();
     const { email, password } = req.body;
 
-    // Admin backdoor
-    if (email === 'admin@southzone.com' && password === 'admin123') {
+    // Check Admin
+    const creds = db.adminCredentials;
+    if (creds && email === creds.email && password === creds.password) {
         return res.json({
-            id: 'admin',
-            name: 'Admin',
-            email: 'admin@southzone.com',
-            role: 'admin'
+            success: true,
+            user: {
+                id: 'admin-1',
+                name: 'Administrator',
+                email: email,
+                role: 'admin'
+            }
         });
     }
 
-    try {
-        const user = await User.findOne({ email, password }); // NOTE: Compare hashed password!
-        if (user) {
-            const { password: _, ...userWithoutPassword } = user.toObject();
-            res.json(userWithoutPassword);
-        } else {
-            res.status(401).json({ error: 'Invalid credentials' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    // Check Customer
+    const users = db.users || [];
+    const customer = users.find(u => u.identifier === email && u.password === password);
+
+    if (customer) {
+        const { password: _, ...userWithoutPass } = customer;
+        return res.json({
+            success: true,
+            user: userWithoutPass
+        });
+    }
+
+    res.status(401).json({ success: false, error: 'Invalid credentials' });
+});
+
+// --- Hero Slider Routes ---
+app.get('/api/hero-slides', (req, res) => {
+    const db = readDB();
+    if (!db.heroSlides || db.heroSlides.length === 0) {
+        const defaultSlides = [
+            { id: 1, image: '/hero1.jpg', caption: 'ELEGANCE MEETS STYLE' },
+            { id: 2, image: '/hero2.jpg', caption: 'DISCOVER YOUR LOOK' },
+            { id: 3, image: '/hero3.jpg', caption: 'REDEFINE FASHION' },
+            { id: 4, image: '/hero4.jpg', caption: 'SHOP THE COLLECTION' }
+        ];
+        db.heroSlides = defaultSlides;
+        writeDB(db);
+        return res.json(defaultSlides);
+    }
+    res.json(db.heroSlides);
+});
+
+app.post('/api/hero-slides', (req, res) => {
+    const db = readDB();
+    const newSlide = { ...req.body, id: Date.now() };
+    db.heroSlides = [...(db.heroSlides || []), newSlide];
+    writeDB(db);
+    res.status(201).json(newSlide);
+});
+
+app.put('/api/hero-slides', (req, res) => {
+    const db = readDB();
+    const slides = req.body;
+    if (!Array.isArray(slides)) {
+        return res.status(400).json({ error: 'Input must be an array of slides' });
+    }
+    db.heroSlides = slides;
+    writeDB(db);
+    res.json({ success: true, slides: db.heroSlides });
+});
+
+app.put('/api/hero-slides/:id', (req, res) => {
+    const db = readDB();
+    const id = Number(req.params.id);
+    const index = (db.heroSlides || []).findIndex(s => s.id === id);
+    if (index !== -1) {
+        db.heroSlides[index] = { ...db.heroSlides[index], ...req.body };
+        writeDB(db);
+        res.json(db.heroSlides[index]);
+    } else {
+        res.status(404).json({ error: 'Slide not found' });
     }
 });
 
+app.delete('/api/hero-slides/:id', (req, res) => {
+    const db = readDB();
+    const id = Number(req.params.id);
+    db.heroSlides = (db.heroSlides || []).filter(s => s.id !== id);
+    writeDB(db);
+    res.json({ success: true });
+});
 
 // --- Twilio SMS ---
-let client;
-try {
-    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOUNT_SID.startsWith('AC')) {
-        client = twilio(
-            process.env.TWILIO_ACCOUNT_SID,
-            process.env.TWILIO_AUTH_TOKEN
-        );
-    } else {
-        console.warn('Twilio credentials missing or invalid. SMS service will be mocked.');
-    }
-} catch (err) {
-    console.warn('Failed to initialize Twilio client:', err.message);
-}
-
 app.post('/send-sms', async (req, res) => {
     const { to, message } = req.body;
 
@@ -206,44 +315,21 @@ app.post('/send-sms', async (req, res) => {
 
     try {
         console.log(`Sending SMS to ${to}...`);
-        if (client) {
-            const result = await client.messages.create({
-                body: message,
-                messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-                to: to
-            });
-            console.log('SMS Sent! SID:', result.sid);
-            res.json({ success: true, sid: result.sid });
-        } else {
-            console.log('[MOCK SMS] Message logged to console (Twilio not configured).');
-            res.json({ success: true, sid: 'MOCK_SID_' + Date.now() });
-        }
+        const result = await client.messages.create({
+            body: message,
+            messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+            to: to
+        });
+
+        console.log('SMS Sent! SID:', result.sid);
+        res.json({ success: true, sid: result.sid });
     } catch (error) {
         console.error('Error sending SMS:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// Serve Static Assets in Production
-if (process.env.NODE_ENV === 'production' || process.env.VITE_API_URL === '/api') {
-    // Serve any static files
-    app.use(express.static(path.join(__dirname, '../dist')));
-
-    // Handle React routing, return all requests to React app
-    app.get('*', (req, res) => {
-        // Skip API routes that fell through (should have been handled above or by 404)
-        if (req.url.startsWith('/api')) {
-            return res.status(404).json({ error: 'API endpoint not found' });
-        }
-        res.sendFile(path.join(__dirname, '../dist', 'index.html'));
-    });
-}
-
-const PORT = process.env.PORT || 3001;
-if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
-    });
-}
-
-module.exports = app;
+const PORT = 3001;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});

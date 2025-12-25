@@ -1,51 +1,39 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../api/client';
 
 const CollectionContext = createContext();
 
 export const useCollection = () => useContext(CollectionContext);
 
 export const CollectionProvider = ({ children }) => {
-    // Default collections (similar to current hardcoded ones)
-    const defaultCollections = [
-        {
-            id: 1,
-            title: 'SHIRTS',
-            image: 'https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?q=80&w=1965&auto=format&fit=crop',
-            link: '/shop?category=shirts'
-        },
-        {
-            id: 2,
-            title: 'PANTS',
-            image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?q=80&w=1974&auto=format&fit=crop',
-            link: '/shop?category=pants'
-        },
-        {
-            id: 3,
-            title: 'T-SHIRTS',
-            image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=2080&auto=format&fit=crop',
-            link: '/shop?category=t-shirts'
-        }
-    ];
-
-    const [collections, setCollections] = useState(() => {
-        const saved = localStorage.getItem('collections');
-        return saved ? JSON.parse(saved) : defaultCollections;
-    });
+    const [collections, setCollections] = useState([]);
 
     useEffect(() => {
-        try {
-            localStorage.setItem('collections', JSON.stringify(collections));
-        } catch (error) {
-            console.error('Failed to save collections to localStorage:', error);
-        }
-    }, [collections]);
+        const fetchCollections = async () => {
+            const data = await api.get('/collections');
+            if (data) setCollections(data);
+        };
+        fetchCollections();
+    }, []);
 
-    const addCollection = (newCollection) => {
-        setCollections(prev => [...prev, { ...newCollection, id: Date.now() }]);
+    const addCollection = async (newCollection) => {
+        try {
+            const savedCollection = await api.post('/collections', newCollection);
+            setCollections(prev => [...prev, savedCollection]);
+        } catch (error) {
+            console.error('Failed to add collection:', error);
+            alert('Failed to add collection');
+        }
     };
 
-    const deleteCollection = (id) => {
-        setCollections(prev => prev.filter(c => c.id !== id));
+    const deleteCollection = async (id) => {
+        try {
+            await api.delete(`/collections/${id}`);
+            setCollections(prev => prev.filter(c => c.id !== id));
+        } catch (error) {
+            console.error('Failed to delete collection:', error);
+            alert('Failed to delete collection');
+        }
     };
 
     return (

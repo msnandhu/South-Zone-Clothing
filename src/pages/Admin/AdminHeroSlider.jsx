@@ -3,11 +3,17 @@ import { useHero } from '../../context/HeroContext';
 import { Trash2, Plus, Edit2, Save, X } from 'lucide-react';
 
 const AdminHeroSlider = () => {
-    const { slides, addSlide, updateCaption, removeSlide } = useHero();
+    const { slides, saveHeroSlides } = useHero();
+    const [localSlides, setLocalSlides] = useState([]);
     const [newImageUrl, setNewImageUrl] = useState('');
     const [editingId, setEditingId] = useState(null);
     const [editCaption, setEditCaption] = useState('');
-    const [isAddMode, setIsAddMode] = useState(false); // To toggle Caption Add mode if desired, or simpler inline
+    const [hasChanges, setHasChanges] = useState(false);
+
+    // Initialize local state from context
+    React.useEffect(() => {
+        setLocalSlides(slides);
+    }, [slides]);
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -23,9 +29,14 @@ const AdminHeroSlider = () => {
     const handleAddImage = (e) => {
         e.preventDefault();
         if (newImageUrl) {
-            addSlide(newImageUrl);
+            const newSlide = {
+                id: Date.now(),
+                image: newImageUrl,
+                caption: 'NEW ARRIVAL'
+            };
+            setLocalSlides([...localSlides, newSlide]);
+            setHasChanges(true);
             setNewImageUrl('');
-            // Reset file input
             document.getElementById('hero-image-upload').value = '';
         }
     };
@@ -36,13 +47,43 @@ const AdminHeroSlider = () => {
     };
 
     const saveCaption = (id) => {
-        updateCaption(id, editCaption);
+        setLocalSlides(localSlides.map(slide =>
+            slide.id === id ? { ...slide, caption: editCaption } : slide
+        ));
         setEditingId(null);
+        setHasChanges(true);
+    };
+
+    const removeSlide = (id) => {
+        setLocalSlides(localSlides.filter(slide => slide.id !== id));
+        setHasChanges(true);
+    };
+
+    const handleSavePreset = () => {
+        saveHeroSlides(localSlides);
+        setHasChanges(false);
+    };
+
+    const handleDiscard = () => {
+        setLocalSlides(slides);
+        setHasChanges(false);
     };
 
     return (
         <div className="admin-page">
-            <h1 className="admin-title">Hero Slider Management</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h1 className="admin-title" style={{ marginBottom: 0 }}>Hero Slider Management</h1>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    {hasChanges && (
+                        <button onClick={handleDiscard} className="admin-btn btn-danger" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <X size={18} /> Discard Changes
+                        </button>
+                    )}
+                    <button onClick={handleSavePreset} className="admin-btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }} disabled={!hasChanges}>
+                        <Save size={18} /> Save Preset
+                    </button>
+                </div>
+            </div>
 
             <div className="admin-section">
                 <h3>Add New Image</h3>
@@ -56,7 +97,7 @@ const AdminHeroSlider = () => {
                         style={{ flex: 1, padding: '10px' }}
                     />
                     <button type="submit" className="admin-btn btn-primary" disabled={!newImageUrl}>
-                        <Plus size={18} /> Add Slide
+                        <Plus size={18} /> Add to List
                     </button>
                 </form>
                 {newImageUrl && (
@@ -68,7 +109,7 @@ const AdminHeroSlider = () => {
             </div>
 
             <div className="admin-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', marginTop: '2rem' }}>
-                {slides.map(slide => (
+                {localSlides.map(slide => (
                     <div key={slide.id} className="product-card" style={{ padding: '1rem' }}>
                         <div style={{ position: 'relative', height: '150px', marginBottom: '1rem', overflow: 'hidden', borderRadius: '8px' }}>
                             <img
@@ -88,8 +129,8 @@ const AdminHeroSlider = () => {
                                         className="form-input"
                                         autoFocus
                                     />
-                                    <button onClick={() => saveCaption(slide.id)} className="icon-btn success" title="Save">
-                                        <Save size={18} />
+                                    <button onClick={() => saveCaption(slide.id)} className="icon-btn success" title="Update Local">
+                                        <div style={{ transform: 'scale(0.8)' }}>Save</div>
                                     </button>
                                     <button onClick={() => setEditingId(null)} className="icon-btn" title="Cancel">
                                         <X size={18} />
@@ -109,7 +150,7 @@ const AdminHeroSlider = () => {
                                 className="admin-btn btn-danger"
                                 style={{ width: '100%', marginTop: 'auto' }}
                             >
-                                <Trash2 size={18} /> Remove Slide
+                                <Trash2 size={18} /> Remove
                             </button>
                         </div>
                     </div>

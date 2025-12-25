@@ -16,9 +16,8 @@
  * @returns {Promise<boolean>} - Resolves to true if sent successfully.
  */
 export const sendSMS = async ({ to, message }) => {
-    const API_URL = import.meta.env.VITE_API_URL;
     try {
-        const response = await fetch(`${API_URL}/send-sms`, {
+        const response = await fetch('http://localhost:3001/send-sms', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

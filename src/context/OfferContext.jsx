@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../api/client';
 
 const OfferContext = createContext();
 
@@ -15,25 +16,41 @@ const initialOffers = [
 ];
 
 export const OfferProvider = ({ children }) => {
-    const [offers, setOffers] = useState(() => {
-        const savedOffers = localStorage.getItem('offers');
-        return savedOffers ? JSON.parse(savedOffers) : initialOffers;
-    });
+    const [offers, setOffers] = useState([]);
 
     useEffect(() => {
-        localStorage.setItem('offers', JSON.stringify(offers));
-    }, [offers]);
-
-    const addOffer = (offer) => {
-        const newOffer = {
-            ...offer,
-            id: Date.now() // Simple unique ID
+        const fetchOffers = async () => {
+            const data = await api.get('/offers');
+            // If backend is empty, maybe we want to seed it? 
+            // For now, just use what's there. 
+            // If strictly following the shared logic, we could seed it if empty.
+            if (data && data.length > 0) {
+                setOffers(data);
+            } else {
+                setOffers([]);
+            }
         };
-        setOffers(prev => [...prev, newOffer]);
+        fetchOffers();
+    }, []);
+
+    const addOffer = async (offer) => {
+        try {
+            const newOffer = await api.post('/offers', offer);
+            setOffers(prev => [...prev, newOffer]);
+        } catch (error) {
+            console.error('Failed to add offer:', error);
+            alert('Failed to add offer');
+        }
     };
 
-    const deleteOffer = (id) => {
-        setOffers(prev => prev.filter(offer => offer.id !== id));
+    const deleteOffer = async (id) => {
+        try {
+            await api.delete(`/offers/${id}`);
+            setOffers(prev => prev.filter(offer => offer.id !== id));
+        } catch (error) {
+            console.error('Failed to delete offer:', error);
+            alert('Failed to delete offer');
+        }
     };
 
     return (

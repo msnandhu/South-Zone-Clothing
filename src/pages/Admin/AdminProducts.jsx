@@ -6,19 +6,53 @@ import { Plus, Edit, Trash2 } from 'lucide-react';
 const AdminProducts = () => {
     const { products, deleteProduct } = useProduct();
 
-    const handleDelete = (id) => {
-        if (!id) {
-            console.error('Attempted to delete product without ID');
-            return;
-        }
-        if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
-            console.log('Deleting product:', id);
-            deleteProduct(id);
+    const [deleteId, setDeleteId] = React.useState(null);
+
+    const confirmDelete = (id) => {
+        setDeleteId(id);
+    };
+
+    const handleDelete = async () => {
+        if (deleteId) {
+            await deleteProduct(deleteId);
+            setDeleteId(null);
         }
     };
 
     return (
         <div>
+            {deleteId && (
+                <div className="modal-overlay" style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <div className="modal-content" style={{
+                        backgroundColor: 'white', padding: '2rem',
+                        borderRadius: '8px', maxWidth: '400px', width: '90%',
+                        textAlign: 'center'
+                    }}>
+                        <h3>Confirm Deletion</h3>
+                        <p>Are you sure you want to delete this product? This action cannot be undone.</p>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '1.5rem' }}>
+                            <button
+                                onClick={handleDelete}
+                                className="admin-btn btn-danger"
+                            >
+                                Yes, Delete
+                            </button>
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="admin-btn"
+                                style={{ backgroundColor: '#ccc', color: '#000' }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="page-header">
                 <h1 className="admin-title">All Products</h1>
                 <Link to="/admin/products/new" className="btn-add">
@@ -54,7 +88,7 @@ const AdminProducts = () => {
                                 <button
                                     type="button"
                                     className="action-btn btn-delete"
-                                    onClick={() => handleDelete(product.id)}
+                                    onClick={() => confirmDelete(product.id)}
                                 >
                                     <Trash2 size={16} />
                                 </button>

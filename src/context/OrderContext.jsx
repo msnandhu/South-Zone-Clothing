@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../api/client';
 
 const OrderContext = createContext();
 
@@ -7,28 +8,22 @@ export const useOrder = () => useContext(OrderContext);
 export const OrderProvider = ({ children }) => {
     const [orders, setOrders] = useState([]);
 
-    const API_URL = import.meta.env.VITE_API_URL || '';
-
     useEffect(() => {
-        fetch(`${API_URL}/api/orders`)
-            .then(res => res.json())
-            .then(data => setOrders(data))
-            .catch(err => console.error('Error fetching orders:', err));
+        const fetchOrders = async () => {
+            const data = await api.get('/orders');
+            if (data) setOrders(data);
+        };
+        fetchOrders();
     }, []);
 
     const addOrder = async (order) => {
         try {
-            const res = await fetch(`${API_URL}/api/orders`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(order)
-            });
-            const newOrder = await res.json();
+            const newOrder = await api.post('/orders', order);
             setOrders(prev => [newOrder, ...prev]);
             return newOrder;
-        } catch (err) {
-            console.error('Error adding order:', err);
-            return null;
+        } catch (error) {
+            console.error('Failed to add order:', error);
+            throw error;
         }
     };
 
