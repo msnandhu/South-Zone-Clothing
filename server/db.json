@@ -1,58 +1,41 @@
 {
-  "adminCredentials": {
-    "email": "admin@southzone.com",
-    "password": "admin"
-  },
-  "products": [],
-  "users": [
-    {
-      "id": "1766613490777",
-      "name": "John Doe",
-      "identifier": "john.doe@example.com",
-      "password": "password123",
-      "role": "customer"
-    }
-  ],
-  "orders": [],
-  "heroSlides": [
-    {
-      "id": 1,
-      "image": "/hero1.jpg",
-      "caption": "ELEGANCE MEETS STYLE"
+    "adminCredentials": {
+        "email": "admin@southzone.com",
+        "password": "admin"
     },
-    {
-      "id": 2,
-      "image": "/hero2.jpg",
-      "caption": "DISCOVER YOUR LOOK"
-    },
-    {
-      "id": 3,
-      "image": "/hero3.jpg",
-      "caption": "REDEFINE FASHION"
-    },
-    {
-      "id": 4,
-      "image": "/hero4.jpg",
-      "caption": "SHOP THE COLLECTION"
-    }
-  ],
-  "collections": [
-    {
-      "title": "TEST COLLECTION",
-      "image": "data:image/png;base64,",
-      "link": "/shop?category=test-collection",
-      "textPosition": "middle",
-      "textColor": "#ffffff",
-      "id": 1766643270564
-    }
-  ],
-  "offers": [
-    {
-      "title": "TEST OFFER",
-      "discountPercentage": 50,
-      "description": "Test Desc",
-      "image": "data:image/png;base64,",
-      "id": 1766643542612
-    }
-  ]
+    "products": [],
+    "users": [
+        {
+            "id": "1766613490777",
+            "name": "John Doe",
+            "identifier": "john.doe@example.com",
+            "password": "password123",
+            "role": "customer"
+        }
+    ],
+    "orders": [],
+    "heroSlides": [
+        {
+            "id": 1,
+            "image": "/hero1.jpg",
+            "caption": "ELEGANCE MEETS STYLE"
+        },
+        {
+            "id": 2,
+            "image": "/hero2.jpg",
+            "caption": "DISCOVER YOUR LOOK"
+        },
+        {
+            "id": 3,
+            "image": "/hero3.jpg",
+            "caption": "REDEFINE FASHION"
+        },
+        {
+            "id": 4,
+            "image": "/hero4.jpg",
+            "caption": "SHOP THE COLLECTION"
+        }
+    ],
+    "collections": [],
+    "offers": []
 }
