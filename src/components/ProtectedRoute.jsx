@@ -6,7 +6,9 @@ const ProtectedRoute = ({ children, role }) => {
     const { user, isAuthenticated } = useAuth();
     const location = useLocation();
 
-    if (!isAuthenticated) {
+    // Check if user exists and is not an empty object (basic check)
+    // Also check for specific role if required
+    if (!isAuthenticated || !user || Object.keys(user).length === 0) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
