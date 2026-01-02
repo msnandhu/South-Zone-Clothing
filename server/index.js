@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const twilio = require('twilio');
+const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -324,29 +324,7 @@ app.delete('/api/hero-slides/:id', (req, res) => {
     res.json({ success: true });
 });
 
-// --- Twilio SMS ---
-app.post('/send-sms', async (req, res) => {
-    const { to, message } = req.body;
 
-    if (!to || !message) {
-        return res.status(400).json({ success: false, error: 'Missing "to" or "message" field' });
-    }
-
-    try {
-        console.log(`Sending SMS to ${to}...`);
-        const result = await client.messages.create({
-            body: message,
-            messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-            to: to
-        });
-
-        console.log('SMS Sent! SID:', result.sid);
-        res.json({ success: true, sid: result.sid });
-    } catch (error) {
-        console.error('Error sending SMS:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
 
 const PORT = 3001;
 app.listen(PORT, () => {

@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useOrder } from '../context/OrderContext';
-import { useSettings } from '../context/SettingsContext';
-import { sendSMS } from '../utils/smsService';
 import './Checkout.css';
 
 const Checkout = () => {
     const navigate = useNavigate();
     const { cartItems, clearCart } = useCart();
     const { addOrder } = useOrder();
-    const { adminCredentials } = useSettings();
     const [formData, setFormData] = useState({
         fullName: '',
         phoneNumber: '',
@@ -35,15 +32,7 @@ const Checkout = () => {
 
         if (confirmPayment) {
             // Prepare Product List string
-            const productList = cartItems.map(item => `${item.name} (x${item.quantity})`).join(', ');
-
-            // 1. Send SMS to Admin
-            const adminMsg = `New Order! Customer: ${formData.fullName}, Phone: ${formData.phoneNumber}, Items: [${productList}], Address: ${formData.address}, ${formData.city} - ${formData.zipCode}. Total: Rs. ${totalAmount}`;
-            await sendSMS({ to: adminCredentials.adminPhone, message: adminMsg });
-
-            // 2. Send SMS to Customer
-            const customerMsg = `Hi ${formData.fullName}, Your order for [${productList}] placed successfully! Total: Rs. ${totalAmount}. Thanks for shopping with SouthZone.`;
-            await sendSMS({ to: formData.phoneNumber, message: customerMsg });
+            // const productList = cartItems.map(item => `${item.name} (x${item.quantity})`).join(', ');
 
             // 3. Save Order to Database (Context)
             addOrder({
@@ -52,7 +41,7 @@ const Checkout = () => {
                 total: totalAmount
             });
 
-            alert('Payment Successful! SMS Sent. Your order has been placed.');
+            alert('Payment Successful! Your order has been placed.');
             clearCart();
             navigate('/');
         }
